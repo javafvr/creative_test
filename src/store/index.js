@@ -6,56 +6,68 @@ const state = {
     cards: [
         {
             title: 'Cat-1',
-            img: 'image-1.png',
+            img: 'image-1.webp',
             isFlipped: false
 
         },
         {
             title: 'Cat-2',
-            img: 'image-2.png',
+            img: 'image-2.webp',
             isFlipped: false
 
         },
         {
             title: 'Cat-3',
-            img: 'image-3.png',
+            img: 'image-3.webp',
             isFlipped: false
 
         },
         {
             title: 'Cat-4',
-            img: 'image-4.jpeg',
+            img: 'image-4.webp',
             isFlipped: false
         },
         {
             title: 'Cat-5',
-            img: 'image-5.png',
+            img: 'image-5.webp',
             isFlipped: false
         },
         {
             title: 'Cat-6',
-            img: 'image-6.png',
+            img: 'image-6.webp',
+            isFlipped: false
+        },
+        {
+            title: 'Cat-7',
+            img: 'image-7.webp',
+            isFlipped: false
+        },
+        {
+            title: 'Cat-8',
+            img: 'image-8.webp',
+            isFlipped: false
+        },
+        {
+            title: 'Cat-9',
+            img: 'image-9.webp',
             isFlipped: false
         }
     ],
+    flippedCards: []
 }
 
-// mutations are operations that actually mutate the state.
-// each mutation handler gets the entire state tree as the
-// first argument, followed by additional payload arguments.
-// mutations must be synchronous and can be recorded by plugins
-// for debugging purposes.
 const mutations = {
-  increment (state) {
-    state.count++
-  },
-  decrement (state) {
-    state.count--
-  }
+    addCardToFlipped (state, card) {
+        state.flippedCards.push(card)
+    },
+    increment (state) {
+        state.count++
+    },
+    decrement (state) {
+        state.count--
+    }
 }
 
-// actions are functions that cause side effects and can involve
-// asynchronous operations.
 const actions = {
   increment: ({ commit }) => commit('increment'),
   decrement: ({ commit }) => commit('decrement'),
@@ -74,13 +86,10 @@ const actions = {
   }
 }
 
-// getters are functions.
 const getters = {
   evenOrOdd: state => state.count % 2 === 0 ? 'even' : 'odd'
 }
 
-// A Vuex instance is created by combining the state, mutations, actions,
-// and getters.
 export default createStore({
   state,
   getters,

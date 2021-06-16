@@ -1,7 +1,7 @@
 ﻿<template>
     <div class="card">
-        <img v-if="isFlipped" class="card__image card__image--back" alt="{{ title }}" src="@/assets/logo.png">
-        <img v-if="!isFlipped" class="card__image card__image--front" alt="Vue logo" src="@/assets/logo.png">
+        <img v-if="isFlipped" class="card__image card__image--back" :alt="title" :src="require('../assets/image/'+img)">
+        <img v-if="!isFlipped" class="card__image card__image--front" alt="Vue logo" src="@/assets/image/logo.png">
     </div>
 </template>
 <script>
@@ -38,11 +38,13 @@ export default {
 </script>
 <style lang="scss" scoped>
     .card {
-        width: 80px;
-        height: 100px;
+        width: 110px;
+        height: 150px;
         border: 1px solid $color-second;
+        border-radius: 5px;
         position: relative;
         transition: all 300ms ease-in-out;
+        overflow: hidden;
 
         &__image {
             width: 100%;
@@ -53,16 +55,6 @@ export default {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-        }
-
-        &--front {
-            transform: rotateY(180deg);
-        }
-
-        &--flipped {
-            &__image {
-                opacity: 0;
-            }
         }
     }
 </style>
