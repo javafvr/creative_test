@@ -15,25 +15,25 @@ export default {
         isFlipped: Boolean,
         img: String
     },
-  computed: {
-    ...mapGetters([
-        'evenOrOdd',
-    ]),
-    imgUrl: function () {
-        return '@/assets/' + this.img
+    computed: {
+        ...mapGetters([
+            'evenOrOdd',
+        ]),
+        imgUrl: function () {
+            return '@/assets/' + this.img
+        }
+    },
+    methods: {
+        ...mapActions([
+            'increment',
+            'decrement',
+            'incrementIfOdd',
+            'incrementAsync'
+        ]),
+        flipCard: function() {
+            console.log(this);
+        }
     }
-  },
-  methods: {
-    ...mapActions([
-        'increment',
-        'decrement',
-        'incrementIfOdd',
-        'incrementAsync'
-    ]),
-    flipCard: function() {
-        console.log(this);
-    }
-  }
 }
 </script>
 <style lang="scss" scoped>

@@ -1,70 +1,80 @@
 ﻿import { createStore } from 'vuex'
 
-// root state object.
-// each Vuex instance is just a single state tree.
 const state = {
-    cards: [
+    initialData: [
         {
             title: 'Cat-1',
             img: 'image-1.webp',
-            isFlipped: false
+            isFlipped: false,
+            timer: 5
 
         },
         {
             title: 'Cat-2',
             img: 'image-2.webp',
-            isFlipped: false
+            isFlipped: false,
+            timer: 5
 
         },
         {
             title: 'Cat-3',
             img: 'image-3.webp',
-            isFlipped: false
+            isFlipped: false,
+            timer: 5
 
         },
         {
             title: 'Cat-4',
             img: 'image-4.webp',
-            isFlipped: false
+            isFlipped: false,
+            timer: 5
         },
         {
             title: 'Cat-5',
             img: 'image-5.webp',
-            isFlipped: false
+            isFlipped: false,
+            timer: 5
         },
         {
             title: 'Cat-6',
             img: 'image-6.webp',
-            isFlipped: false
+            isFlipped: false,
+            timer: 5
         },
         {
             title: 'Cat-7',
             img: 'image-7.webp',
-            isFlipped: false
+            isFlipped: false,
+            timer: 5
         },
         {
             title: 'Cat-8',
             img: 'image-8.webp',
-            isFlipped: false
+            isFlipped: false,
+            timer: 5
         },
         {
             title: 'Cat-9',
             img: 'image-9.webp',
-            isFlipped: false
+            isFlipped: false,
+            timer: 5
         }
     ],
-    flippedCards: []
+    cards: [],
+    flippedCards: [],
+    isGameRun: false,
+    time: {
+        minutes: 0,
+        seconds: 0
+    }
 }
 
 const mutations = {
     addCardToFlipped (state, card) {
         state.flippedCards.push(card)
     },
-    increment (state) {
-        state.count++
-    },
-    decrement (state) {
-        state.count--
+    startTimer (state) {
+        state.isGameRun = true
     }
 }
 

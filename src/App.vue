@@ -1,23 +1,32 @@
 <template>
-  <div class="page">
-    <div class="top-panel">
-      <div class="button">Старт</div>
-    </div>
-    <div class="cardboard">
-      <div 
-        v-for="(card, index) in cards" 
-        :key="index" 
-        class="cardboard__item"
-        :class="{'cardboard__item--flipped': card.isFlipped, 'cardboard__item--disabled': card.isDisabled}"
-        v-on:click="flipCard(card)"
-      >
-        <Card v-bind:title="card.title" v-bind:isFlipped="card.isFlipped" v-bind:img="card.img"></Card>
+  <el-container>
+    <el-header>
+      <el-row>
+        <Timer/>
+        <el-button v-on:click="startGame()" type="primary">Старт</el-button>
+      </el-row>
+    </el-header>
+    <el-main>
+      <div class="cardboard" v-if="isGameRun">
+        <div 
+          v-for="(card, index) in cards" 
+          :key="index" 
+          class="cardboard__item"
+          :class="{'cardboard__item--flipped': card.isFlipped, 'cardboard__item--disabled': card.isDisabled}"
+          v-on:click="flipCard(card)"
+        >
+          <Card v-bind:title="card.title" v-bind:isFlipped="card.isFlipped" v-bind:img="card.img"></Card>
+        </div>
       </div>
-    </div>
-  </div>
+      <Results v-if="!isGameRun"/>
+    </el-main>
+  </el-container>
+
 </template>
 <script>
 import Card from './components/Card.vue'
+import Timer from './components/Timer.vue'
+import Results from './components/Results.vue'
 import store from './store'
 
 export default {
@@ -29,85 +38,129 @@ export default {
     }
   },
   components: {
-    Card
+    Card,
+    Timer,
+    Results
   },
   computed: {
     isMatch: function() {
       return store.state.flippedCards[0].title === store.state.flippedCards[1].title
     },
+    isGameRun: function() {
+      return store.state.isGameRun
+    }
   },
   methods: {
-    countDownTimer() {
-      if(this.countDown > 0 && store.state.flippedCards.length < 2) {
-          setTimeout(() => {
-            console.log('counter ',this.countDown);
-            
-              this.countDown -= 1
-              this.countDownTimer()
-          }, 1000)
-      } else {
-        this.countDown = 5
-        return
-      }
-    },
-    /*for reset flipped cards*/
-    resetFlip: function() {
+    init() {
       setTimeout(() => {
-        store.state.flippedCards.forEach(card => {
+        store.state.cards.forEach(card => {
           card.isFlipped = false
+          card.isDisabled = false
         })
         store.state.flippedCards = []
+        store.state.cards.forEach((card) => {
+          card.isFlipped = false
+        });
       }, 900)
-    },
-    flipCard: function(card) {
-      
-      if (card.isDisabled) return
 
-      card.isFlipped = !card.isFlipped
-      store.commit('addCardToFlipped', card)
-      console.log(store.state.flippedCards.length);
-      if(store.state.flippedCards.length < 2) {
-        this.countDownTimer()
-        this.resetFlip()
+      this.cards = []
+      store.state.cards = []
+      store.state.flippedCards = []
+
+      let tmpCards1 = store.state.initialData.slice();
+      let tmpCards2 = store.state.initialData.slice();
+      store.state.cards = this.cards.concat(tmpCards1, tmpCards2)
+
+      /*Deep clone array))*/
+      store.state.cards = JSON.parse(JSON.stringify(store.state.cards))
+      
+      /*Fisher-Yeats shuffle*/
+      for (let i = store.state.cards.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [store.state.cards[i], store.state.cards[j]] = [store.state.cards[j], store.state.cards[i]];
       }
-      if(store.state.flippedCards.length === 2) {
-        if (this.isMatch) {
-            setTimeout(() => {
-            store.state.flippedCards.forEach(card => {
-              card.isDisabled = true
-            })
-            store.state.flippedCards = []
-          }, 900)
-        } else {
+      this.cards = store.state.cards
+    },
+    startGame() {
+      this.init()
+      store.commit('startTimer')
+    },
+    cardTimer(card) {
+      if(card.timer > 0 && store.state.flippedCards.length < 2) {
           setTimeout(() => {
-            store.state.flippedCards.forEach(card => {
-              card.isFlipped = false
-            })
-            store.state.flippedCards = []
-          }, 900)
+            // console.log('counter ',card.timer)
+            
+              card.timer -= 1
+              this.cardTimer(card)
+          }, 1000)
+      } else {
+        if (store.state.flippedCards.length < 2) {
+          card.isFlipped = false
+          store.state.flippedCards = []
         }
+      }
+    },
+
+    /*Check all cards for current state*/
+    checkCardsStatus() {
+      store.state.isGameRun = !this.cards.every(function(card) {
+        return card.isDisabled
+      })
+      if(store.state.isGameRun) {
+        localStorage.setItem("tableResults", JSON.stringify({'Dmitrii':{
+          'date': '10.06.2021',
+          'name': 'Dmitrii',
+          'time': store.state.time
+        }}));
+
+      }
+    },
+
+    flipCard: function(card) {
+      /*Cases when we prevent flipping */
+      if (card.isDisabled) return
+      if (store.state.flippedCards.length === 2) return
+
+      if (card.isFlipped) {
+        card.isFlipped = false
+        card.timer = 5
+        store.state.flippedCards = []
+      } else {
+        card.isFlipped = true
+        store.commit('addCardToFlipped', card)
+      }
+
+      if(store.state.flippedCards.length < 2) {
+        card.timer = 5
+        this.cardTimer(card)
       }
     }
   },
   created(){
-    store.state.cards.forEach((card) => {
-        card.isFlipped = false
-    });
+    this.init()
 
-    let tmpCards1 = store.state.cards.slice();
-    let tmpCards2 = store.state.cards.slice();
-
-    store.state.cards = this.cards.concat(tmpCards1, tmpCards2)
-
-    /*Deep clone array))*/
-    store.state.cards = JSON.parse(JSON.stringify(store.state.cards))
-
-    /*Fisher-Yeats shuffle*/
-    for (let i = store.state.cards.length - 1; i > 0; i--) {
-      let j = Math.floor(Math.random() * (i + 1));
-      [store.state.cards[i], store.state.cards[j]] = [store.state.cards[j], store.state.cards[i]];
-    }
-    this.cards = store.state.cards
+    this.$watch(() => store.state.flippedCards.length,
+      (flippedCards) => {
+        if(flippedCards === 2){
+          if (this.isMatch) {
+            setTimeout(() => {
+              store.state.flippedCards.forEach(card => {
+                card.isDisabled = true
+              })
+              store.state.flippedCards = []
+              this.checkCardsStatus()
+            }, 900)
+          } else {
+            setTimeout(() => {
+              store.state.flippedCards.forEach(card => {
+                card.isFlipped = false
+              })
+              store.state.flippedCards = []
+            }, 900)
+          }
+        }
+      }
+    )
   },
 }
 </script>
