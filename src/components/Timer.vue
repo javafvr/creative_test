@@ -1,10 +1,11 @@
 ﻿<template>
     <div class="timer">
         <div class="timer__label">Время:</div>
-        <div class="timer__counter">{{timeStr.minutes}} : {{timeStr.seconds}}</div>
+        <div class="timer__counter">{{timeString}}</div>
     </div>
 </template>
 <script>
+import { mapGetters, mapActions } from 'vuex'
 import store from '../store'
 
 export default {
@@ -15,57 +16,40 @@ export default {
                 minutes: 0,
                 seconds: 0
             },
-            timeStr: {
-                minutes: '00',
-                seconds: '00'
-            }
         }
     },
-    props:{
-        // time: String,
+    computed: {
+        ...mapGetters([
+            'timeString',
+        ]),
     },
     methods: {
+        ...mapActions([
+            'resetTimer',
+            'incrementTimer'
+        ]),
         reset() {
-            store.state.time = this.time;
-            [this.time[0], this.time[1]] = [ 0, 0 ]
+            this.resetTimer()
         },
         start() {
             if(store.state.isGameRun) {
                 setTimeout(() => {
-                    if (this.time.seconds < 59 ) {
-                        this.time.seconds += 1
-                        if (this.time.seconds < 10) {
-                            this.timeStr.seconds = '0' + this.time.seconds
-                        } else {
-                            this.timeStr.seconds = this.time.seconds
-                        }
-                    } else {
-                        this.time.seconds = 0
-                        this.timeStr.seconds = '00'
-                        this.time.minutes += 1
-                        if (this.time.minutes < 10) {
-                            this.timeStr.minutes = '0' + this.time.minutes
-                        } else {
-                            this.timeStr.minutes = this.time.minutes
-                        }
-                    }
+                    this.incrementTimer()
                     this.start();
                 }, 1000)
             }
         }
     },
     created(){
-        // this.init()
-
         this.$watch(() => store.state.isGameRun,
-        (isGameRun) => {
-            if(isGameRun) {
-                this.reset()
-                this.start()
-            } else {
-                this.reset()
+            (isGameRun) => {
+                if(isGameRun) {
+                    this.reset()
+                    this.start()
+                } else {
+                    this.reset()
+                }
             }
-        }
         )
     },
 }

@@ -3,7 +3,7 @@
     <el-header>
       <el-row>
         <Timer/>
-        <el-button v-on:click="startGame()" type="primary">Старт</el-button>
+        <el-button v-on:click="start()" type="primary">Старт</el-button>
       </el-row>
     </el-header>
     <el-main>
@@ -24,6 +24,7 @@
 
 </template>
 <script>
+import { mapGetters, mapActions } from 'vuex'
 import Card from './components/Card.vue'
 import Timer from './components/Timer.vue'
 import Results from './components/Results.vue'
@@ -43,6 +44,9 @@ export default {
     Results
   },
   computed: {
+    ...mapGetters([
+      'timeString'
+    ]),
     isMatch: function() {
       return store.state.flippedCards[0].title === store.state.flippedCards[1].title
     },
@@ -51,6 +55,11 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'fillResults',
+      'startGame',
+      'addResult'
+    ]),
     init() {
       setTimeout(() => {
         store.state.cards.forEach(card => {
@@ -73,23 +82,27 @@ export default {
 
       /*Deep clone array))*/
       store.state.cards = JSON.parse(JSON.stringify(store.state.cards))
-      
+
       /*Fisher-Yeats shuffle*/
       for (let i = store.state.cards.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
         [store.state.cards[i], store.state.cards[j]] = [store.state.cards[j], store.state.cards[i]];
       }
       this.cards = store.state.cards
+
+      console.log('init');
+
     },
-    startGame() {
+
+    start() {
       this.init()
-      store.commit('startTimer')
+      if(!store.state.isGameRun) this.startGame()
     },
+
+    /*Start countdown before card will flipped out*/
     cardTimer(card) {
       if(card.timer > 0 && store.state.flippedCards.length < 2) {
           setTimeout(() => {
-            // console.log('counter ',card.timer)
-            
               card.timer -= 1
               this.cardTimer(card)
           }, 1000)
@@ -106,17 +119,17 @@ export default {
       store.state.isGameRun = !this.cards.every(function(card) {
         return card.isDisabled
       })
-      if(store.state.isGameRun) {
-        localStorage.setItem("tableResults", JSON.stringify({'Dmitrii':{
-          'date': '10.06.2021',
-          'name': 'Dmitrii',
-          'time': store.state.time
-        }}));
-
+      if(!store.state.isGameRun) {
+        let result = {
+            'date': new Date().toISOString().slice(0, 10),
+            'name': prompt('Введите свое имя', 'Гость'),
+            'time': this.timeString
+          }
+        this.addResult(result)
+        localStorage.setItem("tableResults", JSON.stringify(store.state.results));
       }
     },
-
-    flipCard: function(card) {
+    flipCard(card) {
       /*Cases when we prevent flipping */
       if (card.isDisabled) return
       if (store.state.flippedCards.length === 2) return
@@ -138,7 +151,7 @@ export default {
   },
   created(){
     this.init()
-
+    this.fillResults()
     this.$watch(() => store.state.flippedCards.length,
       (flippedCards) => {
         if(flippedCards === 2){
@@ -149,19 +162,19 @@ export default {
               })
               store.state.flippedCards = []
               this.checkCardsStatus()
-            }, 900)
+            }, 600)
           } else {
             setTimeout(() => {
               store.state.flippedCards.forEach(card => {
                 card.isFlipped = false
               })
               store.state.flippedCards = []
-            }, 900)
+            }, 600)
           }
         }
       }
     )
-  },
+  }
 }
 </script>
 

@@ -18,14 +18,29 @@
   </el-table>
 </template>
 <script>
+import { mapActions, mapGetters } from 'vuex'
+// import store from '../store'
 export default {
     data() {
         return {
-            tableData: localStorage.tableResults
+            
         }
+    },
+    computed: {
+        ...mapGetters([
+            'tableResults'
+        ]),
+        // tableResults() {
+        //     return store.state.tableResults
+        // }
+    },
+    methods: {
+        ...mapActions([
+            'fillResults',
+        ]),
+    },
+    created() {
+
     }
 }
 </script>
-<style lang="scss" scoped>
-
-</style>
