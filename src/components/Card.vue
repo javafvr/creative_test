@@ -1,7 +1,7 @@
 ﻿<template>
     <div class="card">
         <img v-if="isFlipped" class="card__image card__image--back" :alt="title" :src="require('../assets/image/'+img)">
-        <img v-if="!isFlipped" class="card__image card__image--front" alt="Vue logo" src="@/assets/image/logo.png">
+        <img v-else class="card__image card__image--front" alt="Vue logo" src="@/assets/image/logo.png">
     </div>
 </template>
 <script>

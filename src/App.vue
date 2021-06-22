@@ -89,9 +89,6 @@ export default {
         [store.state.cards[i], store.state.cards[j]] = [store.state.cards[j], store.state.cards[i]];
       }
       this.cards = store.state.cards
-
-      console.log('init');
-
     },
 
     start() {
