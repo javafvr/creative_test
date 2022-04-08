@@ -19,28 +19,16 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-// import store from '../store'
 export default {
-    data() {
-        return {
-            
-        }
-    },
-    computed: {
-        ...mapGetters([
-            'tableResults'
-        ]),
-        // tableResults() {
-        //     return store.state.tableResults
-        // }
-    },
-    methods: {
-        ...mapActions([
-            'fillResults',
-        ]),
-    },
-    created() {
-
-    }
+  computed: {
+    ...mapGetters([
+        'tableResults'
+    ])
+  },
+  methods: {
+    ...mapActions([
+        'fillResults',
+    ])
+  }
 }
 </script>

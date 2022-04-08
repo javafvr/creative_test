@@ -2,111 +2,113 @@
   <el-container>
     <el-header>
       <el-row>
-        <Timer/>
+        <Timer />
         <el-button v-on:click="start()" type="primary">Старт</el-button>
       </el-row>
     </el-header>
     <el-main>
       <div class="cardboard" v-if="isGameRun">
-        <div 
-          v-for="(card, index) in cards" 
-          :key="index" 
+        <div
+          v-for="(card, index) in cards"
+          :key="index"
           class="cardboard__item"
-          :class="{'cardboard__item--flipped': card.isFlipped, 'cardboard__item--disabled': card.isDisabled}"
+          :class="{
+            'cardboard__item--flipped': card.isFlipped,
+            'cardboard__item--disabled': card.isDisabled,
+          }"
           v-on:click="flipCard(card)"
         >
-          <Card v-bind:title="card.title" v-bind:isFlipped="card.isFlipped" v-bind:img="card.img"></Card>
+          <Card
+            v-bind:title="card.title"
+            v-bind:isFlipped="card.isFlipped"
+            v-bind:img="card.img"
+          ></Card>
         </div>
       </div>
-      <Results v-if="!isGameRun"/>
+      <Results v-if="!isGameRun" />
     </el-main>
   </el-container>
-
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
-import Card from './components/Card.vue'
-import Timer from './components/Timer.vue'
-import Results from './components/Results.vue'
-import store from './store'
+import { mapGetters, mapActions } from 'vuex';
+import Card from './components/Card.vue';
+import Timer from './components/Timer.vue';
+import Results from './components/Results.vue';
+import store from './store';
 
 export default {
   name: 'App',
   data() {
     return {
       cards: [],
-      countDown: 5
-    }
+      countDown: 5,
+    };
   },
   components: {
     Card,
     Timer,
-    Results
+    Results,
   },
   computed: {
-    ...mapGetters([
-      'timeString'
-    ]),
+    ...mapGetters(['timeString']),
     isMatch: function() {
-      return store.state.flippedCards[0].title === store.state.flippedCards[1].title
+      return (
+        store.state.flippedCards[0].title === store.state.flippedCards[1].title
+      );
     },
     isGameRun: function() {
-      return store.state.isGameRun
-    }
+      return store.state.isGameRun;
+    },
   },
   methods: {
-    ...mapActions([
-      'fillResults',
-      'startGame',
-      'addResult'
-    ]),
+    ...mapActions(['fillResults', 'startGame', 'addResult']),
     init() {
       setTimeout(() => {
-        store.state.cards.forEach(card => {
-          card.isFlipped = false
-          card.isDisabled = false
-        })
-        store.state.flippedCards = []
         store.state.cards.forEach((card) => {
-          card.isFlipped = false
+          card.isFlipped = false;
+          card.isDisabled = false;
         });
-      }, 900)
+        store.state.flippedCards = [];
+        store.state.cards.forEach((card) => {
+          card.isFlipped = false;
+        });
+      }, 900);
 
-      this.cards = []
-      store.state.cards = []
-      store.state.flippedCards = []
+      this.cards = [];
+      store.state.cards = [];
+      store.state.flippedCards = [];
 
       let tmpCards1 = store.state.initialData.slice();
       let tmpCards2 = store.state.initialData.slice();
-      store.state.cards = this.cards.concat(tmpCards1, tmpCards2)
+      store.state.cards = this.cards.concat(tmpCards1, tmpCards2);
 
       /*Deep clone array))*/
-      store.state.cards = JSON.parse(JSON.stringify(store.state.cards))
+      store.state.cards = JSON.parse(JSON.stringify(store.state.cards));
 
       /*Fisher-Yeats shuffle*/
       for (let i = store.state.cards.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
         [store.state.cards[i], store.state.cards[j]] = [store.state.cards[j], store.state.cards[i]];
       }
-      this.cards = store.state.cards
+      this.cards = store.state.cards;
     },
 
     start() {
-      this.init()
-      if(!store.state.isGameRun) this.startGame()
+      this.init();
+      if (!store.state.isGameRun) this.startGame();
     },
 
     /*Start countdown before card will flipped out*/
     cardTimer(card) {
-      if(card.timer > 0 && store.state.flippedCards.length < 2) {
-          setTimeout(() => {
-              card.timer -= 1
-              this.cardTimer(card)
-          }, 1000)
+      if (card.timer > 0 && store.state.flippedCards.length < 2) {
+        setTimeout(() => {
+          card.timer -= 1;
+          this.cardTimer(card);
+        }, 1000);
       } else {
         if (store.state.flippedCards.length < 2) {
-          card.isFlipped = false
-          store.state.flippedCards = []
+          card.isFlipped = false;
+          store.state.flippedCards = [];
         }
       }
     },
@@ -114,65 +116,75 @@ export default {
     /*Check all cards for current state*/
     checkCardsStatus() {
       store.state.isGameRun = !this.cards.every(function(card) {
-        return card.isDisabled
-      })
-      if(!store.state.isGameRun) {
+        return card.isDisabled;
+      });
+      if (!store.state.isGameRun) {
         let result = {
-            'date': new Date().toISOString().slice(0, 10),
-            'name': prompt('Введите свое имя', 'Гость'),
-            'time': this.timeString
-          }
-        this.addResult(result)
-        localStorage.setItem("tableResults", JSON.stringify(store.state.results));
+          date: new Date().toISOString().slice(0, 10),
+          name: prompt('Введите свое имя', 'Гость'),
+          time: this.timeString,
+        };
+        this.addResult(result);
+        localStorage.setItem(
+          'tableResults',
+          JSON.stringify(store.state.results)
+        );
       }
     },
     flipCard(card) {
       /*Cases when we prevent flipping */
-      if (card.isDisabled) return
-      if (store.state.flippedCards.length === 2) return
+      if (card.isDisabled) return;
+      if (store.state.flippedCards.length === 2) return;
 
       if (card.isFlipped) {
-        card.isFlipped = false
-        card.timer = 5
-        store.state.flippedCards = []
+        card.isFlipped = false;
+        card.timer = 5;
+        store.state.flippedCards = [];
       } else {
-        card.isFlipped = true
-        store.commit('addCardToFlipped', card)
+        card.isFlipped = true;
+        store.commit('addCardToFlipped', card);
       }
 
-      if(store.state.flippedCards.length < 2) {
-        card.timer = 5
-        this.cardTimer(card)
+      if (store.state.flippedCards.length < 2) {
+        card.timer = 5;
+        this.cardTimer(card);
       }
-    }
+    },
   },
-  created(){
-    this.init()
-    this.fillResults()
-    this.$watch(() => store.state.flippedCards.length,
+  created() {
+    this.init();
+    this.fillResults();
+    this.$watch(
+      () => store.state,
+      (state) => {
+        console.log(state);
+      }
+    );
+    this.$watch(
+      () => store.state.flippedCards.length,
       (flippedCards) => {
-        if(flippedCards === 2){
+        if (flippedCards === 2) {
           if (this.isMatch) {
             setTimeout(() => {
-              store.state.flippedCards.forEach(card => {
-                card.isDisabled = true
-              })
-              store.state.flippedCards = []
-              this.checkCardsStatus()
-            }, 600)
+              store.state.flippedCards.forEach((card) => {
+                card.isDisabled = true;
+              });
+              store.state.flippedCards = [];
+              this.checkCardsStatus();
+            }, 600);
           } else {
             setTimeout(() => {
-              store.state.flippedCards.forEach(card => {
-                card.isFlipped = false
-              })
-              store.state.flippedCards = []
-            }, 600)
+              store.state.flippedCards.forEach((card) => {
+                card.isFlipped = false;
+              });
+              store.state.flippedCards = [];
+            }, 600);
           }
         }
       }
-    )
-  }
-}
+    );
+  },
+};
 </script>
 
 <style lang="scss">
@@ -205,9 +217,10 @@ export default {
   border-color: transparent;
   border-style: solid;
   background-color: #3d1df7;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
   &:hover {
-  background-color: #3d1da6;
+    background-color: #3d1da6;
   }
 }
 
